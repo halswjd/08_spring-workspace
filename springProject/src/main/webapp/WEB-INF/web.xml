@@ -25,6 +25,7 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 		
+	<!-- 이 구문으로 사용자가 무엇을 요청하든 appServlet(위의 구문)을 계속 거치는거임 -->
 	<servlet-mapping>
 		<servlet-name>appServlet</servlet-name>
 		<url-pattern>/</url-pattern>
