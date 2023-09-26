@@ -16,7 +16,8 @@
 		<result column="status" property="status"/>
 	</resultMap>
 	
-	<select id="loginMember" resultMap="MemberResultSet" parameterType="Member">
+	<select id="loginMember" resultMap="MemberResultSet" parameterType="Member">  <!-- parameterType은 생략 가능 -->
+		<!-- 
 		select
 		       user_id
 		     , user_pwd
@@ -33,5 +34,49 @@
 		 where user_id = #{ userId }
 		   and user_pwd = #{ userPwd }
 		   and status = 'Y'
+		-->
+		
+		select
+		       user_id
+		     , user_pwd
+		     , user_name
+		     , email
+		     , gender
+		     , age
+		     , phone
+		     , address
+		     , enroll_date
+		     , modify_date
+		     , status
+		  from member
+		 where user_id = #{ userId }
+		   and status = 'Y'
+		   
 	</select>
+	
+	<insert id="insertMember">
+		insert
+		  into member
+		  (
+		    user_id
+		  , user_pwd
+		  , user_name
+		  , email
+		  , gender
+		  , age
+		  , phone
+		  , address
+		  )
+		  values
+		  (
+		    #{userId}
+		  , #{userPwd}
+		  , #{userName}
+		  , #{email}
+		  , #{gender}
+		  , #{age}
+		  , #{phone}
+		  , #{address}
+		  )
+	</insert>
 </mapper>

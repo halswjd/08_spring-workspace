@@ -5,21 +5,26 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.kh.spring.member.model.service.MemberServiceImpl;
 import com.kh.spring.member.model.vo.Member;
 
-@Controller // Controller 타입의 어노테이션을 붙여주면 빈스캐닝을 통해 자동으로 빈 둥록
+@Controller // Controller 타입의 어노테이션을 붙여주면 빈스캐닝을 통해 자동으로 빈 등록 => Spring Explorer탭에서 빈 등록된걸 확인 가능 
 public class MemberController {
 	
 //	private MemberServiceImpl mService = new MemberServiceImpl();
 	
 	@Autowired // 기존 위의 코드 대신 스프링이 알아서 필요할 때 생성하고 필요없으면 소멸시켜주는 역할 => DI(Dependency Injection) 특징 
 	private MemberServiceImpl mService;
+	
+	@Autowired
+	private BCryptPasswordEncoder bcryptPasswordEncoder;
 	
 // @Controller => import함으로써 어노테이션 방식(스프링이 관리가능할수있게끔 bean에 등록됨), 이건 내가 만든 Class여야 가능한거임
 
@@ -117,14 +122,20 @@ public class MemberController {
 	 * 	  포워딩 할 뷰로 전달하고자하는 데이터를 맵형식(key-value)으로 담을 수 있는 영역
 	 * 	  Model 객체는 requestScope 이다.
 	 *    단, setAttribute가 아닌 addAttribute 메소드 이용
-	 *    <beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-				<beans:property name="prefix" value="/WEB-INF/views/" />
-				<beans:property name="suffix" value=".jsp" />
-			</beans:bean>
+	 *    
+	 *    
+	 *  * return "main"
+	 *  <beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+			<beans:property name="prefix" value="/WEB-INF/views/" /> => 경로의 앞부분
+			<beans:property name="suffix" value=".jsp" /> => 뒷부분
+		</beans:bean> 
+		==> /WEB-INF/views/main.jsp 응답페이지 요청
 	 *    
 	 */
+	
+	/*
 	@RequestMapping("login.me")
-	public String loginMember(Member m, Model model, HttpSession session) { // 내가 service단에 Member 객체를 넘길거로 키값(name)과 Member 객체의 필드명이 일치할 경우 객체 바로 생성 가능함
+	public String loginMember(Member m, Model model, HttpSession session) { // 내가 service단에 Member 객체를 넘길 때 키값(name)과 Member 객체의 필드명이 일치할 경우 객체 바로 생성 가능함
 		
 //		System.out.println("ID : " + m.getUserId() + ", PWD : " + m.getUserPwd());
 		Member loginMember = mService.loginMember(m);
@@ -137,8 +148,114 @@ public class MemberController {
 		}else { 
 			// 로그인 성공 => loginMember sessionScope에 담고 메인페이지 url 재요청
 			session.setAttribute("loginMember", loginMember);
-			
 			return "redirect:/";
+		}
+		
+		
+	}
+	 */
+	
+	
+	/*
+	 * 2. 스프링에서 제공하는 ModelAndView 객체를 이용하는 방법
+	 * 
+	 *   Model은 데이터를 key-value 세트로 담을 수 있는 공간이라고 한다면
+	 *   View는 응답뷰에 대한 정보를 담을 수 있는 공간
+	 * 
+	 */
+	
+	@RequestMapping("login.me")
+	public ModelAndView loginMember(Member m, HttpSession session, ModelAndView mv) { // 내가 service단에 Member 객체를 넘길 때 키값(name)과 Member 객체의 필드명이 일치할 경우 객체 바로 생성 가능함
+		
+		/* 암호화 작업 전에 했던 과정
+		Member loginMember = mService.loginMember(m);
+		
+		if(loginMember == null) { 
+			// 로그인 실패 => 에러메시지(응답데이터) requestScope에 담아서 에러페이지(/WEB-INF/views/common.errorPage.jsp)로 포워딩
+			mv.addObject("errorMsg", "로그인실패"); // addObjects("키", "벨류"); 
+			mv.setViewName("common/errorPage"); // 응답페이지 요청
+			
+		}else { 
+			// 로그인 성공 => loginMember sessionScope에 담고 메인페이지 url 재요청
+			session.setAttribute("loginMember", loginMember);
+			mv.setViewName("redirect:/");
+		}
+		
+		return mv;
+		*/
+		
+		// 암호화 작업 후에 해야되는 과정
+		// Member m userId 필드 : 사용자가 입력한 아이디
+		// 		   userPwd 필드 : 사용자가 입력한 비번(평문)
+		Member loginMember = mService.loginMember(m);
+		// loginMember : 오로지 아이디만을 가지고 조회된 회원
+		// loginMember userPwd 필드 : db에 기록된 비번(암호문)
+		
+		// matches("평문비번", "암호화비번") : boolean 반환, 두 인자가 일치하면 true 반환 
+		if(loginMember != null && bcryptPasswordEncoder.matches(m.getUserPwd(), loginMember.getUserPwd())) { // Id로 조회된 loginMember 객체가 있으면서 평문비번과 암호화비번이 같은 경우
+			// 로그인 성공
+			session.setAttribute("loginMember", loginMember);
+			mv.setViewName("redirect:/");
+		}else {
+			// 로그인 실패
+			mv.addObject("errorMsg", "로그인실패"); // addObjects("키", "벨류"); 
+			mv.setViewName("common/errorPage"); // 응답페이지 요청
+			
+		}
+		
+		return mv;
+		
+	}
+	
+	@RequestMapping("logout.me")
+	public String logoutMember(HttpSession session) {
+		session.invalidate(); // session 영역 초기화
+		return "redirect:/"; // 메인페이지로 이동
+	}
+	
+	@RequestMapping("enrollForm.me")
+	public String enrollForm() {
+		// WEB-INF/views/member/memberEnrollForm.jsp 로 포워딩     
+		return "member/memberEnrollForm";
+		
+	}
+	
+	@RequestMapping("myPage.me")
+	public String myPageForm() {
+		// WEB-INF/views/member/myPage.jsp
+		return "member/myPage";
+	}
+	
+
+	@RequestMapping("insert.me")
+	public String insertMember(Member m, Model model, HttpSession session) {
+//		System.out.println(m);
+		// 1. 한글 깨짐 => 스프링에서 제공하는 인코딩 필터 등록 필요
+		// 2. 나이를 입력하지 않았을 경우 "" 빈문자열이 넘어오는데 int형 필드에 담을 수 없어서 400 에러 발생
+		//    => Member 클래스에 age 필드를 int형 --> String형으로 변경 --> DB member 테이블에 age 자료형이 number인데 괜찮나? -> 오라클은 자동형변환이 가능!
+		// 3. 비밀번호가 사용자가 입력한 있는 그대로의 평문(pass01) -> 암호화 필요 -> 암호문(adfa@ds!XX)
+		//	  => Bcrypt 방식의 암호화를 통해서 암호문으로 변경    
+		//	  	=> 1) 스프링 시큐리티 모듈에서 제공(라이브러리 추가 pom.xml)
+		//	  	=> 2) BcryptPassWirdEncoder 라는 클래스를 빈으로 등록(xml방식) -> -> spring-security.xml 파일에
+		//			  외부 클래스라 어노테이션방식 안되고 xml 방식으로 등록해야함
+		//		=> 3) web.xml에 spring-security.xml 파일을 pre-loading 할 수 있도록 작성
+		
+//		System.out.println("평문 : " + m.getUserPwd());
+		
+		// 암호화 작업 (암호문을 만들어내는 과정)
+//		bcryptPasswordEncoder.encode("평문");
+		String encPwd = bcryptPasswordEncoder.encode(m.getUserPwd());
+//		System.out.println("암호문 : " + encPwd);
+		m.setUserPwd(encPwd); // Member 객체에 userPwd에 평문이 아닌 암호문으로 변경
+		
+		int result = mService.insertMember(m);
+		
+		if(result > 0) { // 회원가입 성공 => 메인페이지로 url 재요청
+			session.setAttribute("alertMsg", "성공적으로 회원가입되었습니다.");
+			return "redirect:/";
+		}else { // 실패 => 에러문구 담아서 errorPage로 포워딩
+			model.addAttribute("errorMsg", "회원가입 실패!");
+			return "common/errorPage";
 		}
 		
 	}

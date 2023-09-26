@@ -62,7 +62,13 @@
     </style>
 </head>
 <body>
-	
+	<c:if test="${ not empty alertMsg }">
+		<script>
+			alert("${alertMsg}");
+		</script>
+		<!-- session에서 alertMsg 삭제 -->
+		<c:remove var="alertMsg" scope="session"/> <!-- scope는 생략가능 -->
+	</c:if>	
     <div id="header">
         <div id="header_1">
             <div id="header_1_left">
@@ -73,15 +79,15 @@
             	<c:choose>
             		<c:when test="${ empty loginMember }">
 		                <!-- 로그인 전 -->
-		                <a href="">회원가입</a> |
+		                <a href="enrollForm.me">회원가입</a> |
 		                <a data-toggle="modal" data-target="#loginModal">로그인</a>
 		                <!-- 모달의 원리 : 이 버튼 클릭시 data-targer에 제시되어있는 해당 아이디의 div요소를 띄워줌 -->
 	                </c:when>
 	                <c:otherwise>
 	                     <!-- 로그인 후-->
 	                     <label>${ loginMember.userName }님 환영합니다</label> &nbsp;&nbsp;
-	                     <a href="">마이페이지</a>
-	                     <a href="">로그아웃</a>
+	                     <a href="myPage.me">마이페이지</a>
+	                     <a href="logout.me">로그아웃</a>
                      </c:otherwise>
                 </c:choose>
             </div>
