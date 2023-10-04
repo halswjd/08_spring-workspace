@@ -10,18 +10,18 @@
 	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
 	
 	<!-- Enables the Spring MVC @Controller programming model -->
-	<annotation-driven /> <!-- 모든 문서의 어노테인션을 찾아서 등록할거다~ 구문 -->
+	<annotation-driven /> <!-- 모든 문서(.java)의 어노테인션을 찾아서 빈 등록할거다~ 구문 -->
 
 	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
 	<resources mapping="/resources/**" location="/resources/" />
 
 	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
 	<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="prefix" value="/WEB-INF/views/" /> <!-- 응답뷰 앞, 뒤에 붙는 url -->
 		<beans:property name="suffix" value=".jsp" />
 	</beans:bean>
 	
-	<context:component-scan base-package="com.kh.spring" /> <!-- annotation-driven 코드가 실행될 때 base-package의 경로아래에 모든 문서의 어노테인션을 등록할거다~ -->
+	<context:component-scan base-package="com.kh.spring" /> <!-- annotation-driven 코드가 실행될 때 base-package의 경로아래에 모든 문서(.java)의 어노테인션을 빈 등록할거다~ -->
 	
 	<!-- 
 		* 사용자가 어떤 url로 요청시 해당 이 문서가 읽혀진다고 보면됨!!

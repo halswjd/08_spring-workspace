@@ -15,6 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.kh.spring.member.model.service.MemberServiceImpl;
 import com.kh.spring.member.model.vo.Member;
 
+// @Controller => import함으로써 어노테이션 방식(스프링이 관리가능할수있게끔 bean에 등록됨), 이건 내가 만든 Class여야 가능한거임
 @Controller // Controller 타입의 어노테이션을 붙여주면 빈스캐닝을 통해 자동으로 빈 등록 => Spring Explorer탭에서 빈 등록된걸 확인 가능 
 public class MemberController {
 	
@@ -22,11 +23,9 @@ public class MemberController {
 	
 	@Autowired // 기존 위의 코드 대신 스프링이 알아서 필요할 때 생성하고 필요없으면 소멸시켜주는 역할 => DI(Dependency Injection) 특징 
 	private MemberServiceImpl mService;
-	
 	@Autowired
 	private BCryptPasswordEncoder bcryptPasswordEncoder;
 	
-// @Controller => import함으로써 어노테이션 방식(스프링이 관리가능할수있게끔 bean에 등록됨), 이건 내가 만든 Class여야 가능한거임
 
 	/*
 	@RequestMapping(value="login.me") // RequestMapping 타입의 어노테이션을 붙여줌으로써 HandlerMapping 등록 => 절대 중복 불가!
@@ -256,6 +255,60 @@ public class MemberController {
 		}else { // 실패 => 에러문구 담아서 errorPage로 포워딩
 			model.addAttribute("errorMsg", "회원가입 실패!");
 			return "common/errorPage";
+		}
+		
+	}
+	
+	@RequestMapping("update.me")
+	public String updateMember(Member m, Model model, HttpSession session) {
+		
+		int result = mService.updateMember(m);
+		
+		if(result > 0) { // 수정 성공
+			// db로 부터 수정된 회원 정보를 다시 조회해와서
+			// session에 loginMember 키값으로 덮어씌워야함
+			
+			Member updateMember = mService.loginMember(m);
+			session.setAttribute("loginMember", updateMember);
+			// session.setAttribute("loginMember", mService.loginMember(m));
+			
+			// alert 띄워줄 문구 담기
+			session.setAttribute("alertMsg", "성공적으로 회원정보 변경되었습니다.");
+			
+			// 마이페이지로 url 재요청
+			return "redirect:myPage.me"; // :/ => contextPath , :myPage.me => myPage.me Controller 탐
+			
+		}else { // 수정 실패 => 에러문구 담아서 에러페이지 포워딩
+			model.addAttribute("errorMsg", "회원정보 변경 실패!");
+			return "common/errorPage";
+		}
+		
+	}
+	
+	@RequestMapping("delete.me")
+	public String deleteMember(String userPwd, String userId, HttpSession session, Model model) { // name값이 userPwd, userId을 찾아서 바로 변수 설정
+		
+		// userPwd : 회원탈퇴 요청시 사용자가 입력한 비밀번호 평문이 담겨있음
+		// session에 loginMember Member객체 userPwd필드에 db로 부터 조회된 비번(암호문)이 담겨있음
+		String encPwd = ((Member)session.getAttribute("loginMember")).getUserPwd();
+		
+		if(bcryptPasswordEncoder.matches(userPwd, encPwd)) { // 입력한 비번이 맞음 => 탈퇴처리
+			int result = mService.deleteMember(userId);			
+			
+			if(result > 0) { // 탈퇴처리 성공 => session에 있는 loginMember 지우고, alert문구 담기 => 메인페이지 url 재요청
+				
+				session.removeAttribute("loginMember");
+				session.setAttribute("alertMsg", "성공적으로 탈퇴되었습니다. 그동안 이용해주셔서 감사합니다.");
+				return "redirect:/";
+				
+			}else { // 탈퇴처리 실패 => 에러문구 담아서 에러페이지 포워딩
+				model.addAttribute("errorMsg","회원탈퇴 실패!");
+				return "common/errorPage";
+			}
+			
+		}else { // 비번 틀림 => 비밀번호가 틀림을 알리고 마이페이지가 보여지게 처리, url 재요청
+			session.setAttribute("alertMsg", "비밀번호를 잘못 입력하셨습니다. 확인해주세요");
+			return "redirect:myPage.me";
 		}
 		
 	}

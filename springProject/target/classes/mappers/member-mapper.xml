@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" >
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd" > <!-- DTD~구문 : 유효성검사 구문 -->
 <mapper namespace="memberMapper">
-	
+
 	<resultMap type="Member" id="MemberResultSet">
 		<result column="user_id" property="userId"/>
 		<result column="user_pwd" property="userPwd"/>
@@ -15,6 +15,7 @@
 		<result column="modify_date" property="modifyDate"/>
 		<result column="status" property="status"/>
 	</resultMap>
+	
 	
 	<select id="loginMember" resultMap="MemberResultSet" parameterType="Member">  <!-- parameterType은 생략 가능 -->
 		<!-- 
@@ -79,4 +80,24 @@
 		  , #{address}
 		  )
 	</insert>
+	
+	<update id="updateMember">
+		update
+			   member
+		   set user_name = #{userName}
+		     , email = #{email}
+		     , age = #{age}
+		     , phone = #{phone}
+		     , address = #{address}
+		     , gender = #{gender}
+		     , modify_date = sysdate
+		 where user_id = #{userId}
+	</update>
+	
+	<update id="deleteMember">
+		update
+			   member
+		   set status = 'N'
+		 where user_id = #{userId}
+	</update>
 </mapper>
