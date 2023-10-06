@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.kh.spring.board.model.dao.BoardDao;
+import com.kh.spring.board.model.vo.Attachment;
 import com.kh.spring.board.model.vo.Board;
 import com.kh.spring.board.model.vo.Reply;
 import com.kh.spring.common.model.vo.PageInfo;
@@ -47,12 +48,12 @@ public class BoardServiceImpl implements BoardService{
 
 	@Override
 	public int deleteBoard(int boardNo) {
-		return 0;
+		return bDao.deleteBoard(sqlSession, boardNo);
 	}
 
 	@Override
 	public int updateBoard(Board b) {
-		return 0;
+		return bDao.updateBoard(sqlSession, b);
 	}
 
 	@Override
@@ -64,5 +65,12 @@ public class BoardServiceImpl implements BoardService{
 	public int insertReply(Reply r) {
 		return 0;
 	}
+
+	@Override
+	public int insertAttachment(ArrayList<Attachment> atList) {
+		return bDao.insertAttachment(sqlSession, atList);
+	}
+	
+	
 
 }

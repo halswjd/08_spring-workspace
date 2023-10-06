@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.kh.spring.member.model.service.MemberServiceImpl;
@@ -310,6 +311,24 @@ public class MemberController {
 			session.setAttribute("alertMsg", "비밀번호를 잘못 입력하셨습니다. 확인해주세요");
 			return "redirect:myPage.me";
 		}
+	}
+	
+	@ResponseBody
+	@RequestMapping(value="idCheck.me")
+	public String idCheck(String checkId) {
+		
+		int count = mService.idCheck(checkId);
+		
+		/*
+		if(count > 0) { // 이미 존재하는 아이디 => 사용불가능(NNNNN)
+			return "NNNNN"
+		}else { // 사용 가능(NNNNY)
+			return "NNNNY"
+		}
+		*/
+		
+		// 위의 구문 삼항연산자로 (조건?true일때 반환결과 :false일때 반환결과)
+		return count > 0 ? "NNNNN" : "NNNNY";
 		
 	}
 }

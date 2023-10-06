@@ -2,6 +2,7 @@ package com.kh.spring.board.model.service;
 
 import java.util.ArrayList;
 
+import com.kh.spring.board.model.vo.Attachment;
 import com.kh.spring.board.model.vo.Board;
 import com.kh.spring.board.model.vo.Reply;
 import com.kh.spring.common.model.vo.PageInfo;
@@ -30,4 +31,7 @@ public interface BoardService {
 	
 	// 7. 댓글 작성용 서비스 (ajax)
 	int insertReply(Reply r);
+	
+	// 첨파 여러개
+	int insertAttachment(ArrayList<Attachment> atList);
 }
