@@ -14,12 +14,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.google.gson.Gson;
 import com.kh.spring.board.model.service.BoardServiceImpl;
 import com.kh.spring.board.model.vo.Attachment;
 import com.kh.spring.board.model.vo.Board;
+import com.kh.spring.board.model.vo.Reply;
 import com.kh.spring.common.model.vo.PageInfo;
 import com.kh.spring.common.template.Pagination;
 
@@ -100,6 +103,7 @@ public class BoardController {
 					atList.add(at);
 				}
 			}
+			
 			
 		}
 		
@@ -285,5 +289,21 @@ public class BoardController {
 			model.addAttribute("errorMsg", "게시판 수정 실패!");
 			return "common/errorPage";
 		}
+	}
+	
+	@ResponseBody
+	@RequestMapping(value="rlist.bo", produces="application/json; charset=UTF-8")
+	public String ajaxSelectReplyList(int bno) {
+		ArrayList<Reply> list = bService.selectReplyList(bno);
+		
+		return new Gson().toJson(list);
+	}
+	
+	@ResponseBody
+	@RequestMapping("rinsert.bo")
+	public String ajaxInsertReply(Reply r) {
+		int result = bService.insertReply(r);
+		
+		return result>0? "success" : "fail";
 	}
 }

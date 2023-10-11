@@ -14,6 +14,13 @@
 		<result column="change_name" property="changeName"/>
 	</resultMap>
 	
+	<resultMap type="Reply" id="replyResult">
+		<result column="reply_no" property="replyNo"/>
+		<result column="reply_content" property="replyContent"/>
+		<result column="reply_writer" property="replyWriter"/>
+		<result column="create_date" property="createDate"/>
+	</resultMap>
+	
 	<select id="selectListCount" resultType="_int">
 		select
 			   count(*)
@@ -92,7 +99,8 @@
 		 where board_no = #{boardNo}
 	</update>
 	
-	<insert id="insertAttachment">
+	<!-- 
+	<insert id="insertAttachment" parameterType="java.util.List">
 		insert
 		  into attachment
 		  (
@@ -101,11 +109,43 @@
 		  , ref_bno
 		  )
 		  values
-		  <foreach item="f" index="index" collection="" >
+		  <foreach item="f" index="index" collection="list" >
 		  (
-		  		
+		  	#{f.originName}
+		  , 
 		  )
 		  </foreach>
 	</insert>
+	 -->
+	 
+	<select id="selectReplyList" resultMap="replyResult">
+		select
+			   reply_no
+			 , reply_content
+			 , reply_writer
+			 , to_char(create_date, 'YYYY-MM-DD') as "create_date"
+		  from reply
+		 where ref_bno = #{boardNo}
+		   and status = 'Y'
+		 order
+		    by reply_no desc
+	</select>	
 	
+	<insert id="insertReply">
+		insert
+		  into reply
+		  (
+		  	reply_no
+		  , reply_content
+		  , reply_writer
+		  , ref_bno
+		  )
+		  values
+		  (
+		    seq_rno.nextval
+		  , #{replyContent}
+		  , #{replyWriter}
+		  , #{refBoardNo}
+		  )		  
+	</insert>
 </mapper>
