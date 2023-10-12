@@ -51,6 +51,14 @@
 	 	> 장점 : xml문서내에 한 눈에 볼 수 있어서 관리의 편의성은 높음
 	 	> 단점 : 단, bean 개수가 많아지면 오히려 관리하기 어려움 / 여러 개발자가 같은 xml 파일을 수정하면 충돌이 발생 될 수 있음
 	  -->
-		
+
+	<interceptors>
+		<interceptor>
+			<mapping path="/myPage.me"/> <!-- 매핑값을 탈 때 인터셉트 실행하겠다 -->
+			<mapping path="/update.me"/>
+			<mapping path="/enrollForm.bo"/>
+			<beans:bean class="com.kh.spring.common.interceptor.LoginInterceptor" id="loginInterceptor"/>
+		</interceptor>
+	</interceptors>		
 	
 </beans:beans>

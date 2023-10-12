@@ -32,6 +32,10 @@ public interface BoardService {
 	// 7. 댓글 작성용 서비스 (ajax)
 	int insertReply(Reply r);
 	
+	// 8. 조회수 top5 리스트 조회용 서비스
+	ArrayList<Board> selectTopBoardList();
+	
+	
 	// 첨파 여러개
 	int insertAttachment(ArrayList<Attachment> atList);
 }

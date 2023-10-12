@@ -70,6 +70,11 @@ public class BoardServiceImpl implements BoardService{
 	public int insertAttachment(ArrayList<Attachment> atList) {
 		return bDao.insertAttachment(sqlSession, atList);
 	}
+
+	@Override
+	public ArrayList<Board> selectTopBoardList() {
+		return bDao.selectTopBoardList(sqlSession);
+	}
 	
 	
 

@@ -148,4 +148,22 @@
 		  , #{refBoardNo}
 		  )		  
 	</insert>
+	
+	<select id="selectTopBoardList" resultMap="boardResult">
+		select * 
+		  from (
+		        select
+		               board_no
+		             , board_title
+		             , board_writer
+		             , count
+		             , to_char(create_date, 'YYYY-MM-DD') as "create_date"
+		             , origin_name
+		          from board
+		         where status = 'Y'
+		         order
+		            by count desc
+		       )
+		  where rownum between 1 and 5
+	</select>
 </mapper>
